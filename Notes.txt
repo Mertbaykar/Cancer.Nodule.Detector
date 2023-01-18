@@ -1,0 +1,11 @@
+
+1. Renkli görüntü griye dönüştürülecek RGB örnek değerleri (0,2989 - 0,5870 - 0,1140)
+
+Gri Seviye=0,2989 * Kırmızı + 0,5870 * Yeşil+ 0,1140 * Mavi (3.1)
+
+2. Gri seviyeli olarak oluşturulan görüntülerde gürültü faktörlerinin önüne geçmek için
+öncelikle ikinci dereceden medyan filtresi ardından laplacian filtresi uygulanacak.
+
+3. Oluşan gri resim Otsu Threshold algoritmasıyla binary image'a dönüştürülecek.
+
+Nodül PDF'inde 53. sayfadan sonrası önemli
