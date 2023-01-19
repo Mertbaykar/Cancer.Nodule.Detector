@@ -1,5 +1,7 @@
 ﻿using System.Drawing;
 using System.Drawing.Imaging;
+using AForge.Imaging;
+using AForge.Imaging.Filters;
 
 namespace ImageProcessing
 {
@@ -8,36 +10,43 @@ namespace ImageProcessing
         public static void ApplyFilter2Image(ref Bitmap image)
         {
             ApplyOtsuThreshold(ref image);
-            //ReverseBlackAndWhiteOfBinaryImage(ref image);
+            // Burada background komple beyaz hale gelmeli
+            AdjustBackground(ref image);
+            FillHoles(ref image);
         }
-
+        private static void FillHoles(ref Bitmap image)
+        {
+            FillHoles filter = new FillHoles();
+            filter.MaxHoleHeight = 70;
+            filter.MaxHoleWidth  = 70;
+            filter.CoupledSizeFiltering = false;
+            // apply the filter
+            filter.ApplyInPlace(image);
+        }
         public static void ApplyOtsuThreshold(ref Bitmap bmp)
         {
-            Grayscale(ref bmp);
-            int otsuThreshold = GetOtsuThreshold(bmp) * 3;
-            Threshold(ref bmp, (short)otsuThreshold);
+            GrayscaleImage(ref bmp);
+            //int otsuThreshold = GetOtsuThreshold(bmp) * 3;
+            OtsuThreshold filter = new OtsuThreshold();
+            filter.ApplyInPlace(bmp);
         }
 
-        private static void Grayscale(ref Bitmap bmp)
+        public static void AdjustBackground(ref Bitmap image)
         {
-            BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            //AForge.Imaging.Filters.BlobsFiltering
+            ExtractBiggestBlob blobfilter = new ExtractBiggestBlob();
+            image =  blobfilter.Apply(image);
+            //PointedColorFloodFill filter = new PointedColorFloodFill(Color.Black);
+            //filter.ApplyInPlace(image);
+            //BlobsFiltering
+            //BlobsFiltering filter = new BlobsFiltering();
+            //filter.ApplyInPlace(image);
+        }
 
-            unsafe
-            {
-                byte* ptr = (byte*)bmpData.Scan0.ToPointer();
-                int stopAddress = (int)ptr + bmpData.Stride * bmpData.Height;
-
-                while ((int)ptr != stopAddress)
-                {
-                    *ptr = (byte)((ptr[2] * .299) + (ptr[1] * .587) + (ptr[0] * .114));
-                    ptr[1] = *ptr;
-                    ptr[2] = *ptr;
-
-                    ptr += 3;
-                }
-            }
-
-            bmp.UnlockBits(bmpData);
+        private static void GrayscaleImage(ref Bitmap bmp)
+        {
+            Grayscale scale = new Grayscale(0.299, 0.587, 0.114);
+            bmp = scale.Apply(bmp);
         }
 
         private static void Threshold(ref Bitmap bmp, short thresholdValue)
@@ -47,7 +56,7 @@ namespace ImageProcessing
             if (thresholdValue < 0) return;
             else if (thresholdValue > MaxVal) return;
 
-            BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
 
             unsafe
             {
@@ -145,7 +154,7 @@ namespace ImageProcessing
             int k;
 
             BitmapData bmData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
-            ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
 
             unsafe
             {
@@ -173,7 +182,7 @@ namespace ImageProcessing
 
         private static void ReverseBlackAndWhiteOfBinaryImage(ref Bitmap image)
         {
-            //BitmapData bmpData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            //BitmapData bmpData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
 
             unsafe
             {
