@@ -2,10 +2,10 @@
 using ImageProcessing;
 using System.Drawing;
 
-string path = "P:\\Cancer.Nodule.Detector\\Mertbaykar\\Cancer.Nodule.Detector\\ImageProcessor.Test\\Images\\example.png";
-//string path = "D:\\Cancer.Nodule.Detector\\Cancer.Nodule.Detector\\ImageProcessor.Test\\Images\\example.png";
-string filepath2Save = "P:\\Cancer.Nodule.Detector\\Mertbaykar\\Cancer.Nodule.Detector\\ImageProcessor.Test\\ProcessedImages\\example2.png";
-//string filepath2Save = "D:\\Cancer.Nodule.Detector\\Cancer.Nodule.Detector\\ImageProcessor.Test\\ProcessedImages\\example4.png";
+//string path = "P:\\Cancer.Nodule.Detector\\Mertbaykar\\Cancer.Nodule.Detector\\ImageProcessor.Test\\Images\\example.png";
+string path = "D:\\Cancer.Nodule.Detector\\Cancer.Nodule.Detector\\ImageProcessor.Test\\Images\\example.png";
+//string filepath2Save = "P:\\Cancer.Nodule.Detector\\Mertbaykar\\Cancer.Nodule.Detector\\ImageProcessor.Test\\ProcessedImages\\example2.png";
+string filepath2Save = "D:\\Cancer.Nodule.Detector\\Cancer.Nodule.Detector\\ImageProcessor.Test\\ProcessedImages\\example4.png";
 
 try
 {

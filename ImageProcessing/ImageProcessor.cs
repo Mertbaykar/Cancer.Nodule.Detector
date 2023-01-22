@@ -1,7 +1,11 @@
 ﻿using System.Drawing;
 using System.Drawing.Imaging;
+using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
+using AForge;
 using AForge.Imaging;
 using AForge.Imaging.Filters;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ImageProcessing
 {
@@ -31,16 +35,62 @@ namespace ImageProcessing
             filter.ApplyInPlace(bmp);
         }
 
-        public static void AdjustBackground(ref Bitmap image)
+        private static void AdjustBackground(ref Bitmap image)
         {
             //AForge.Imaging.Filters.BlobsFiltering
-            ExtractBiggestBlob blobfilter = new ExtractBiggestBlob();
-            image =  blobfilter.Apply(image);
-            //PointedColorFloodFill filter = new PointedColorFloodFill(Color.Black);
-            //filter.ApplyInPlace(image);
-            //BlobsFiltering
-            //BlobsFiltering filter = new BlobsFiltering();
-            //filter.ApplyInPlace(image);
+            //ExtractBiggestBlob blobfilter = new ExtractBiggestBlob();
+            //image =  blobfilter.Apply(image);
+
+            //Bitmap cloneImage = image.Clone(new Rectangle(0,0,image.Width,image.Height),PixelFormat.Format8bppIndexed);
+            //ApplyMask maskFilter = new ApplyMask(image);
+            //maskFilter.ApplyInPlace(cloneImage);
+
+
+            #region Görselin üst kısmını beyaza boyuyor
+            PointedColorFloodFill topleftFilter = new PointedColorFloodFill(Color.White) { StartingPoint = new AForge.IntPoint(0, 0), Tolerance = Color.Black };
+            topleftFilter.ApplyInPlace(image);
+            #endregion
+
+            #region Ciğerlerin en altındaki siyah kısmı beyaza çeviriyor
+            BlobCounterBase bc = new BlobCounter();
+            bc.FilterBlobs = true;
+            bc.MinWidth  = 5;
+            bc.MinHeight = 5;
+            bc.ObjectsOrder = ObjectsOrder.XY;
+            bc.ProcessImage(image);
+            // İlk blob ciğerlerin olduğu blob
+            AForge.Imaging.Blob[] blobs = bc.GetObjectsInformation();
+            bc.GetBlobsTopAndBottomEdges(blobs.FirstOrDefault(), out List<IntPoint> topEdge, out List<IntPoint> bottomEdge);
+            PaintPixels(image, bottomEdge, Color.White); 
+            #endregion
+        }
+
+        private static void PaintPixels(Bitmap image, List<IntPoint> points, Color color)
+        {
+          
+            // BURADA PİXELLER BEYAZA ÇEVRİLECEK. 8 bpp OLAYINDAN DOLAYI SETPİXEL ÇALIŞMADI.
+
+
+            //BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+
+            //// Copy the bytes from the image into a byte array
+            //byte[] bytes = new byte[data.Height * data.Stride];
+            //Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
+
+            //bytes[5 * data.Stride + 5] = 1; // Set the pixel at (5, 5) to the color #1
+
+            //// Copy the bytes from the byte array into the image
+            //Marshal.Copy(bytes, 0, data.Scan0, bytes.Length);
+
+            //image.UnlockBits(data);
+            //var whiteNumber = image.Palette.Entries.FirstOrDefault(x => x.ToKnownColor() == KnownColor.White);
+
+            foreach (var point in points)
+            {
+                //bytes[point.X * data.Stride + point.Y] = ; // Set the pixel at (5, 5) to the color #1
+
+                //image.SetPixel(point.X, point.Y, color);
+            }
         }
 
         private static void GrayscaleImage(ref Bitmap bmp)
