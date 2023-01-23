@@ -96,29 +96,6 @@ namespace ImageProcessing
             #endregion
         }
 
-        private static void PaintPixels(Bitmap image, List<IntPoint> points, Color color)
-        {
-
-            // BURADA PİXELLER BEYAZA ÇEVRİLECEK. 8 bpp OLAYINDAN DOLAYI SETPİXEL ÇALIŞMADI.
-
-            //BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
-
-            //// Copy the bytes from the image into a byte array
-            //byte[] bytes = new byte[data.Height * data.Stride];
-            //Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
-            //var whiteNumber = image.Palette.Entries.FirstOrDefault(x => x.R == color.R && x.G == color.G && x.B == color.B).ToArgb();
-
-            //foreach (var point in points)
-            //{
-            //    //bytes[point.X * data.Stride + point.Y] = ; // Set the pixel at (5, 5) to the color #1
-            //    bytes[point.Y * data.Stride + point.X] = (byte)whiteNumber; // Set the pixel at (5, 5) to the color #1
-            //}
-            //// Copy the bytes from the byte array into the image
-            //Marshal.Copy(bytes, 0, data.Scan0, bytes.Length);
-            //image.UnlockBits(data);
-
-        }
-
         private static void GrayscaleImage(ref Bitmap bmp)
         {
             Grayscale scale = new Grayscale(0.299, 0.587, 0.114);
