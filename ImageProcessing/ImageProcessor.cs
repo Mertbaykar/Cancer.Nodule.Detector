@@ -61,36 +61,31 @@ namespace ImageProcessing
             // İlk blob ciğerlerin olduğu blob
             AForge.Imaging.Blob[] blobs = bc.GetObjectsInformation();
             bc.GetBlobsTopAndBottomEdges(blobs.FirstOrDefault(), out List<IntPoint> topEdge, out List<IntPoint> bottomEdge);
-            PaintPixels(image, bottomEdge, Color.White); 
+            PaintPixels(image, bottomEdge, Color.White);
             #endregion
         }
 
         private static void PaintPixels(Bitmap image, List<IntPoint> points, Color color)
         {
-          
+
             // BURADA PİXELLER BEYAZA ÇEVRİLECEK. 8 bpp OLAYINDAN DOLAYI SETPİXEL ÇALIŞMADI.
 
+            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
 
-            //BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
-
-            //// Copy the bytes from the image into a byte array
-            //byte[] bytes = new byte[data.Height * data.Stride];
-            //Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
-
-            //bytes[5 * data.Stride + 5] = 1; // Set the pixel at (5, 5) to the color #1
-
-            //// Copy the bytes from the byte array into the image
-            //Marshal.Copy(bytes, 0, data.Scan0, bytes.Length);
-
-            //image.UnlockBits(data);
-            //var whiteNumber = image.Palette.Entries.FirstOrDefault(x => x.ToKnownColor() == KnownColor.White);
+            // Copy the bytes from the image into a byte array
+            byte[] bytes = new byte[data.Height * data.Stride];
+            Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
+            var whiteNumber = image.Palette.Entries.FirstOrDefault(x => x.R == color.R && x.G == color.G && x.B == color.B).ToArgb();
 
             foreach (var point in points)
             {
                 //bytes[point.X * data.Stride + point.Y] = ; // Set the pixel at (5, 5) to the color #1
-
-                //image.SetPixel(point.X, point.Y, color);
+                bytes[point.X * data.Stride + point.Y] = (byte)whiteNumber; // Set the pixel at (5, 5) to the color #1
             }
+            // Copy the bytes from the byte array into the image
+            Marshal.Copy(bytes, 0, data.Scan0, bytes.Length);
+            image.UnlockBits(data);
+
         }
 
         private static void GrayscaleImage(ref Bitmap bmp)
