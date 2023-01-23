@@ -37,7 +37,6 @@ namespace ImageProcessing
 
         private static void AdjustBackground(ref Bitmap image)
         {
-            //AForge.Imaging.Filters.BlobsFiltering
             //ExtractBiggestBlob blobfilter = new ExtractBiggestBlob();
             //image =  blobfilter.Apply(image);
 
@@ -45,10 +44,9 @@ namespace ImageProcessing
             //ApplyMask maskFilter = new ApplyMask(image);
             //maskFilter.ApplyInPlace(cloneImage);
 
-
             #region Görselin üst kısmını beyaza boyuyor
-            PointedColorFloodFill topleftFilter = new PointedColorFloodFill(Color.White) { StartingPoint = new AForge.IntPoint(0, 0), Tolerance = Color.Black };
-            topleftFilter.ApplyInPlace(image);
+            PointedColorFloodFill topFilter = new PointedColorFloodFill(Color.White) { StartingPoint = new AForge.IntPoint(0, 0), Tolerance = Color.Black };
+            topFilter.ApplyInPlace(image);
             #endregion
 
             #region Ciğerlerin en altındaki siyah kısmı beyaza çeviriyor
@@ -60,8 +58,41 @@ namespace ImageProcessing
             bc.ProcessImage(image);
             // İlk blob ciğerlerin olduğu blob
             AForge.Imaging.Blob[] blobs = bc.GetObjectsInformation();
-            bc.GetBlobsTopAndBottomEdges(blobs.FirstOrDefault(), out List<IntPoint> topEdge, out List<IntPoint> bottomEdge);
-            PaintPixels(image, bottomEdge, Color.White);
+            AForge.Imaging.Blob lungsBlob = blobs.FirstOrDefault();
+            bc.ExtractBlobsImage(image, lungsBlob, false);
+
+            int originalHeight = image.Height;
+            UnmanagedImage lungsImage = lungsBlob.Image;
+            image = lungsImage.ToManagedImage();
+            var height2Fill = originalHeight - image.Height;
+
+
+            #region Alt kısmı beyaz ile doldurmak için yeni bitmap yaratıyoruz
+            // indexed olduğu için graphics düzgün çalışmıyor. Resmi çizdirip 
+            Bitmap bottomImage = new Bitmap(image.Width, height2Fill, PixelFormat.Format8bppIndexed);
+
+            using (Graphics grp = Graphics.FromImage(bottomImage))
+            {
+                grp.FillRectangle(Brushes.White, new Rectangle(0, 0, image.Width, height2Fill));
+            }
+            #endregion
+
+            #region Ciğer blob resmi ile alta gelecek olan beyaz resim birleştiriliyor
+            Bitmap resultImage = new Bitmap(image.Width, originalHeight);
+
+            using (Graphics g = Graphics.FromImage(resultImage))
+            {
+                g.DrawImage(image, 0, 0);
+                g.DrawImage(bottomImage, 0, image.Height);
+            }
+            #endregion
+
+            image = resultImage;
+
+            //PointedColorFloodFill bottomFilter = new PointedColorFloodFill(Color.White) { StartingPoint = new AForge.IntPoint(0, image.Height), Tolerance = Color.Black };
+            //bottomFilter.ApplyInPlace(image);
+            //bc.GetBlobsTopAndBottomEdges(blobs.FirstOrDefault(), out List<IntPoint> topEdge, out List<IntPoint> bottomEdge);
+            //PaintPixels(image, bottomEdge, Color.White);
             #endregion
         }
 
@@ -70,21 +101,21 @@ namespace ImageProcessing
 
             // BURADA PİXELLER BEYAZA ÇEVRİLECEK. 8 bpp OLAYINDAN DOLAYI SETPİXEL ÇALIŞMADI.
 
-            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
+            //BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
 
-            // Copy the bytes from the image into a byte array
-            byte[] bytes = new byte[data.Height * data.Stride];
-            Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
-            var whiteNumber = image.Palette.Entries.FirstOrDefault(x => x.R == color.R && x.G == color.G && x.B == color.B).ToArgb();
+            //// Copy the bytes from the image into a byte array
+            //byte[] bytes = new byte[data.Height * data.Stride];
+            //Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
+            //var whiteNumber = image.Palette.Entries.FirstOrDefault(x => x.R == color.R && x.G == color.G && x.B == color.B).ToArgb();
 
-            foreach (var point in points)
-            {
-                //bytes[point.X * data.Stride + point.Y] = ; // Set the pixel at (5, 5) to the color #1
-                bytes[point.X * data.Stride + point.Y] = (byte)whiteNumber; // Set the pixel at (5, 5) to the color #1
-            }
-            // Copy the bytes from the byte array into the image
-            Marshal.Copy(bytes, 0, data.Scan0, bytes.Length);
-            image.UnlockBits(data);
+            //foreach (var point in points)
+            //{
+            //    //bytes[point.X * data.Stride + point.Y] = ; // Set the pixel at (5, 5) to the color #1
+            //    bytes[point.Y * data.Stride + point.X] = (byte)whiteNumber; // Set the pixel at (5, 5) to the color #1
+            //}
+            //// Copy the bytes from the byte array into the image
+            //Marshal.Copy(bytes, 0, data.Scan0, bytes.Length);
+            //image.UnlockBits(data);
 
         }
 
