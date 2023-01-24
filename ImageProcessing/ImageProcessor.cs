@@ -59,40 +59,16 @@ namespace ImageProcessing
             // İlk blob ciğerlerin olduğu blob
             AForge.Imaging.Blob[] blobs = bc.GetObjectsInformation();
             AForge.Imaging.Blob lungsBlob = blobs.FirstOrDefault();
-            bc.ExtractBlobsImage(image, lungsBlob, false);
+            bc.ExtractBlobsImage(image, lungsBlob, true);
 
-            int originalHeight = image.Height;
             UnmanagedImage lungsImage = lungsBlob.Image;
             image = lungsImage.ToManagedImage();
-            var height2Fill = originalHeight - image.Height;
 
-
-            #region Alt kısmı beyaz ile doldurmak için yeni bitmap yaratıyoruz
-            // indexed olduğu için graphics düzgün çalışmıyor. Resmi çizdirip 
-            Bitmap bottomImage = new Bitmap(image.Width, height2Fill, PixelFormat.Format8bppIndexed);
-
-            using (Graphics grp = Graphics.FromImage(bottomImage))
-            {
-                grp.FillRectangle(Brushes.White, new Rectangle(0, 0, image.Width, height2Fill));
-            }
-            #endregion
-
-            #region Ciğer blob resmi ile alta gelecek olan beyaz resim birleştiriliyor
-            Bitmap resultImage = new Bitmap(image.Width, originalHeight);
-
-            using (Graphics g = Graphics.FromImage(resultImage))
-            {
-                g.DrawImage(image, 0, 0);
-                g.DrawImage(bottomImage, 0, image.Height);
-            }
-            #endregion
-
-            image = resultImage;
-
-            //PointedColorFloodFill bottomFilter = new PointedColorFloodFill(Color.White) { StartingPoint = new AForge.IntPoint(0, image.Height), Tolerance = Color.Black };
+            
+            //PointedColorFloodFill bottomFilter = new PointedColorFloodFill(Color.White) { StartingPoint = new AForge.IntPoint(0, 0), Tolerance = Color.Black };
             //bottomFilter.ApplyInPlace(image);
-            //bc.GetBlobsTopAndBottomEdges(blobs.FirstOrDefault(), out List<IntPoint> topEdge, out List<IntPoint> bottomEdge);
-            //PaintPixels(image, bottomEdge, Color.White);
+            //topFilter.ApplyInPlace(image);
+
             #endregion
         }
 
